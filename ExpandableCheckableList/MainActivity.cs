@@ -82,65 +82,6 @@ namespace ExpandableCheckableList
                 ExpandableRecyclerView.SetAdapter(adapter = new ExpandableItemsAdapter(terms));
             else
                 ExpandableRecyclerView.SetAdapter(adapter = new ExpandableItemsAdapter(terms, _selectedTerms));
-
-            /*
-
-            var dialog = alertBuilder.SetView(ExpandableRecyclerView).SetCancelable(true)
-                .SetPositiveButton(Android.Resource.String.Ok, (o, a) =>
-                {
-                    if (_selectedTerms is null)
-                        _selectedTerms = new HashSet<int>();
-                    else
-                        _selectedTerms.Clear();
-
-                    _selectedTerms.UnionWith(adapter.ChosenIds);
-
-                    FirstPageRequest();
-
-                    ((AlertDialog)o).Dismiss();
-                })
-                .SetNegativeButton(Android.Resource.String.Cancel, (o, a) =>
-                {
-                    ((AlertDialog)o).Dismiss();
-                })
-                .SetNeutralButton(Resource.String.reset, (IDialogInterfaceOnClickListener)null).Create();
-
-            dialog.DismissEvent += (o, a) =>
-            {
-                Helper.Bzzz(tag + $"Terms: {string.Join(',', _selectedTerms)}");
-                if (_selectedTerms.Count > 0)
-                {
-                    ChosenCategoriesView.Visibility = ViewStates.Visible;
-                    ChosenCategoriesView.Text = string.Join(", ", terms.Where(t => _selectedTerms.Contains(t.Id)).Select(t => t.ToString()));
-                }
-                else
-                {
-                    ChosenCategoriesView.Visibility = ViewStates.Gone;
-                    ChosenCategoriesView.Text = null;
-                }
-            };
-
-            adapter.ItemChecked += (o, a) =>
-            {
-                dialog.GetButton((int)DialogButtonType.Neutral).Visibility = adapter.HasChosen ? ViewStates.Visible : ViewStates.Invisible;
-            };
-            adapter.ItemUnchecked += (o, a) =>
-            {
-                dialog.GetButton((int)DialogButtonType.Neutral).Visibility = adapter.HasChosen ? ViewStates.Visible : ViewStates.Invisible;
-            };
-            dialog.Show();
-
-            dialog.GetButton((int)DialogButtonType.Neutral).Visibility = (adapter.ChosenIds.Count > 0 ? ViewStates.Visible : ViewStates.Invisible);
-            dialog.GetButton((int)DialogButtonType.Neutral).Click += (o, a) =>
-            {
-                /*if (_selectedTerms is null)
-                    _selectedTerms = new HashSet<int>();
-                else
-                    _selectedTerms.Clear();*/
-            /*
-        adapter.ResetChosen();
-        dialog.GetButton((int)DialogButtonType.Neutral).Visibility = adapter.HasChosen ? ViewStates.Visible : ViewStates.Invisible;
-    };*/
         }
     }
 }
