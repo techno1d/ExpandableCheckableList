@@ -4,7 +4,7 @@ using Android.Views;
 
 namespace ExpandableCheckableList
 {
-    public class ParentItemViewHolder : RecyclerView.ViewHolder, IBindableViewHolder<ExpandableRVItem<DataModel>>
+    public class ParentItemViewHolder : RecyclerView.ViewHolder, IBindableViewHolder<ExpandableRVItem<DataModel>>, IMarkableViewHolder
     {
         public enum ToggleAction { Expand, Check }
         public AppCompatCheckedTextView CheckedTextView { get; }
@@ -41,7 +41,7 @@ namespace ExpandableCheckableList
         {
             if (mark)
             {
-                CheckedTextView.SetBackgroundColor(new Android.Graphics.Color(UIHelper.ResolveColorAttr(ItemView.Context, Android.Resource.Attribute.ColorControlHighlight)));
+                CheckedTextView.SetBackgroundColor(new Android.Graphics.Color(UIHelper.ResolveColorAttr(ItemView.Context, Android.Resource.Attribute.ColorControlHighlight)));                
             }
             else
             {

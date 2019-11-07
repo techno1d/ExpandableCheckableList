@@ -1,9 +1,10 @@
 ﻿using Android.App;
 using Android.OS;
-using Android.Support.V7.App;
 using Android.Runtime;
-using Android.Widget;
+using Android.Support.V7.App;
 using Android.Support.V7.Widget;
+using Android.Widget;
+using Android.Views;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,9 +12,11 @@ using System.Collections.Generic;
 namespace ExpandableCheckableList
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    public class MainActivity : AppCompatActivity
+    public class MainActivity : AppCompatActivity, View.IOnClickListener
     {
         public RecyclerView ExpandableRecyclerView { get; private set; }
+        public Button OkButton { get; private set; }
+        public Button ResetButton { get; private set; }
 
         HashSet<int> _selectedTerms = new HashSet<int>();
         List<DataModel> terms = new List<DataModel>()
@@ -59,22 +62,41 @@ namespace ExpandableCheckableList
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            // Set our view from the "main" layout resource
+            
             SetContentView(Resource.Layout.activity_main);
 
-            var rnd = new Random();            
-            for (int i = 0; i < rnd.Next(50,150); i++)
+            var rnd = new Random();
+            int parentCount = terms.Count;
+            for (int i = parentCount + 1; i < rnd.Next(50, 150); i++)
             {
-                terms.Add(new DataModel { Id = terms.Count, Name = $"Generated #{i}", Parent = rnd.Next(terms.Count - 1) });
+                terms.Add(new DataModel { Id = i , Name = $"Generated #{i}", Parent = rnd.Next(1, terms.Count - 1) });
             }
 
-            InitRecyclerView();
+            ExpandableRecyclerView = FindViewById<RecyclerView>(Resource.Id.expandable_recycler_view);
+            OkButton = FindViewById<Button>(Resource.Id.ok_button);
+            ResetButton = FindViewById<Button>(Resource.Id.reset_button);
+
+            InitRecyclerView();            
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+
+            OkButton?.SetOnClickListener(this);
+            ResetButton?.SetOnClickListener(this);
+        }
+
+        protected override void OnPause()
+        {
+            base.OnPause();
+
+            OkButton?.SetOnClickListener(null);
+            ResetButton?.SetOnClickListener(null);
         }
 
         private void InitRecyclerView()
         {
-            ExpandableRecyclerView = FindViewById<RecyclerView>(Resource.Id.expandable_recycler_view);
-
             ExpandableRecyclerView.SetLayoutManager(new LinearLayoutManager(this, (int)Orientation.Vertical, false));
 
             ExpandableItemsAdapter adapter = null;
@@ -82,6 +104,42 @@ namespace ExpandableCheckableList
                 ExpandableRecyclerView.SetAdapter(adapter = new ExpandableItemsAdapter(terms));
             else
                 ExpandableRecyclerView.SetAdapter(adapter = new ExpandableItemsAdapter(terms, _selectedTerms));
+
+            adapter.ItemChecked += Adapter_ItemChecked;
+            adapter.ItemUnchecked += Adapter_ItemUnchecked;
+        }
+
+        private void Adapter_ItemUnchecked(object sender, EventArgs e)
+        {
+            if (sender is ExpandableRVAdapter<DataModel> adapter && ResetButton != null && !adapter.HasChosen)
+                ResetButton.Visibility = ViewStates.Invisible;
+        }
+
+        private void Adapter_ItemChecked(object sender, EventArgs e)
+        {
+            if (sender is ExpandableRVAdapter<DataModel> adapter && ResetButton != null && adapter.HasChosen)
+                ResetButton.Visibility = ViewStates.Visible;
+        }
+
+        public void OnClick(View v)
+        {
+            switch (v.Id)
+            {
+                case Resource.Id.ok_button:
+                    {
+                        if (ExpandableRecyclerView?.GetAdapter() is ExpandableItemsAdapter adapter)
+                            Toast.MakeText(this, adapter.HasChosen ? "Chosen IDs: " + string.Join(", ", adapter.ChosenIds) : "No IDs chosen!", ToastLength.Long).Show();
+                    }
+                    break;                    
+                case Resource.Id.reset_button:
+                    {
+                        if (ExpandableRecyclerView?.GetAdapter() is ExpandableItemsAdapter adapter)
+                            adapter.ResetChosen();
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
